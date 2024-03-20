@@ -51,9 +51,6 @@ public class EmployeeEntity implements Serializable {
     @Column(name = "department", length = 50, nullable = false)
     private String department;
 
-    @Column(name = "position", length = 50, nullable = false)
-    private String position;
-
     @Column(name = "salary", nullable = false)
     private double salary;
 

@@ -11,6 +11,4 @@ public interface EmployeeService {
     <T> T getAllEmployees(Integer pageNumber, Integer pageSize, String searchValue);
 
     void deleteEmployee(String employeeId);
-
-    EmployeeDTO getEmployeeView(String employeeId);
 }

@@ -25,8 +25,6 @@ public class EmployeeDTO implements Serializable {
 
     private String department;
 
-    private String position;
-
     private Double salary;
 
     private Date modifiedAt;

@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.List;
 
 import static com.example.Employee.management.CRUD.EndpointConstants.*;
 
@@ -29,23 +28,37 @@ public class EmployeeController {
         this.employeeRepository = employeeRepository;
     }
 
+    /**
+     * Retrieves a list of employees.
+     *
+     * @param pageNumber  The page number for pagination (optional).
+     * @param pageSize    The page size for pagination (optional).
+     * @param searchValue The search value to filter employees by (optional).
+     * @return A ResponseEntity containing the list of employees.
+     */
     @GetMapping(MASTER_EMPLOYEES_API)
-    public <T> ResponseEntity<WebResponseEntity<T>> getEmployee( @RequestParam(required = false, name = "pageNumber") Integer pageNumber,
-                                                                 @RequestParam(required = false, name = "pageSize") Integer pageSize,
-                                                                 @RequestParam(required = false, name = "searchValue") String searchValue){
+    public <T> ResponseEntity<WebResponseEntity<T>> getEmployee(@RequestParam(required = false, name = "pageNumber") Integer pageNumber,
+                                                                @RequestParam(required = false, name = "pageSize") Integer pageSize,
+                                                                @RequestParam(required = false, name = "searchValue") String searchValue) {
         log.info("Getting Employees List ::");
-            try {
-                WebResponseEntity<T> response = new WebResponseEntity<>(0, true,
-                        (T) employeeService.getAllEmployees(pageNumber, pageSize, searchValue));
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            } catch (Exception e) {
-                log.error("Error While Getting Employees List ::", e);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        try {
+            WebResponseEntity<T> response = new WebResponseEntity<>(0, true,
+                    (T) employeeService.getAllEmployees(pageNumber, pageSize, searchValue));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error While Getting Employees List ::", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+    /**
+     * Saves the details of an employee.
+     *
+     * @param employeeDTO The DTO containing the details of the employee to be saved.
+     * @return A ResponseEntity indicating the result of the operation.
+     */
     @PostMapping(MASTER_EMPLOYEES_API)
-    public ResponseEntity<WebResponseEntity<EmployeeDTO>> saveEmployee(@RequestBody EmployeeDTO employeeDTO){
+    public ResponseEntity<WebResponseEntity<EmployeeDTO>> saveEmployee(@RequestBody EmployeeDTO employeeDTO) {
         log.info("Saving Employee Details :");
         try {
             employeeDTO.setModifiedAt(new Date());
@@ -59,8 +72,14 @@ public class EmployeeController {
         }
     }
 
+    /**
+     * Updates the details of an existing employee.
+     *
+     * @param employeeDTO The DTO containing the updated details of the employee.
+     * @return A ResponseEntity indicating the result of the operation.
+     */
     @PutMapping(MASTER_EMPLOYEE_UPDATE)
-    public ResponseEntity<WebResponseEntity<EmployeeDTO>> updateEmployee(@RequestBody EmployeeDTO employeeDTO){
+    public ResponseEntity<WebResponseEntity<EmployeeDTO>> updateEmployee(@RequestBody EmployeeDTO employeeDTO) {
         log.info("Update Employee Details :");
         try {
             employeeDTO.setModifiedAt(new Date());
@@ -73,19 +92,13 @@ public class EmployeeController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    @GetMapping(MASTER_EMPLOYEE_VIEW)
-    public ResponseEntity<WebResponseEntity<List<EmployeeDTO>>> getEmployeeView(@RequestParam String employeeId) {
-        log.info("Getting Employee View ::");
-        try {
-            WebResponseEntity<List<EmployeeDTO>> response = new WebResponseEntity<>(0, true,
-                    employeeService.getEmployeeView(employeeId));
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            log.error("Error While Getting Employee View ::", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
+    /**
+     * Deletes an employee from the employee list.
+     *
+     * @param employeeId The ID of the employee to be deleted (optional).
+     * @return A ResponseEntity indicating the result of the operation.
+     */
     @DeleteMapping(MASTER_EMPLOYEE_DELETE)
     public ResponseEntity<WebResponseEntity<String>> deleteEmployee(@RequestParam(required = false) String employeeId) {
         log.info("Deleting employee from employeeList: {}", employeeId);

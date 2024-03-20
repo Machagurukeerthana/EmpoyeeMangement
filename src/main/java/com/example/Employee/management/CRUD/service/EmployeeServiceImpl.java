@@ -72,7 +72,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                     .department(employeeDTO.getDepartment() != null ? employeeDTO.getDepartment() : existingEmployee.getDepartment())
                     .phoneNumber(employeeDTO.getPhoneNumber() != null ? employeeDTO.getPhoneNumber() : existingEmployee.getPhoneNumber())
                     .email(employeeDTO.getEmail() != null ? employeeDTO.getEmail() : existingEmployee.getEmail())
-                    .position(employeeDTO.getPosition() != null ? employeeDTO.getPosition() : existingEmployee.getPosition())
                     .address(employeeDTO.getAddress() != null ? employeeDTO.getAddress() : existingEmployee.getAddress())
                     .gender(employeeDTO.getGender() != null ? employeeDTO.getGender() : existingEmployee.getGender())
                     .salary(employeeDTO.getSalary() != null ? employeeDTO.getSalary() : existingEmployee.getSalary())
@@ -96,19 +95,28 @@ public class EmployeeServiceImpl implements EmployeeService {
         List<Predicate> countPredicates = new ArrayList<>();
         if (!StringUtil.isNullOrEmpty(searchValue)) {
             searchValue = searchValue.toLowerCase();
-            dataPredicates.add(criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(queryRoot.get("department")), '%' + searchValue + '%'),
-                    criteriaBuilder.like(criteriaBuilder.lower(queryRoot.get("firstName")), '%' + searchValue + '%'),
-                    criteriaBuilder.like(criteriaBuilder.lower(queryRoot.get("mobileNumber")), '%' + searchValue + '%'),
-                    criteriaBuilder.like(criteriaBuilder.lower(queryRoot.get("employeeId")), '%' + searchValue + '%')
-            ));
-            countPredicates.add(criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(queryRoot.get("department")), '%' + searchValue + '%'),
-                    criteriaBuilder.like(criteriaBuilder.lower(countRoot.get("firstName")), '%' + searchValue + '%'),
-                    criteriaBuilder.like(criteriaBuilder.lower(countRoot.get("mobileNumber")), '%' + searchValue + '%'),
-                    criteriaBuilder.like(criteriaBuilder.lower(countRoot.get("employeeId")), '%' + searchValue + '%')
-            ));
+            Predicate[] dataSearchPredicates = new Predicate[4]; // Array to store search predicates for data
+            Predicate[] countSearchPredicates = new Predicate[4]; // Array to store search predicates for count
+
+            // Construct search predicates for dataPredicates
+            dataSearchPredicates[0] = criteriaBuilder.like(criteriaBuilder.lower(queryRoot.get("department")), '%' + searchValue + '%');
+            dataSearchPredicates[1] = criteriaBuilder.like(criteriaBuilder.lower(queryRoot.get("firstName")), '%' + searchValue + '%');
+            dataSearchPredicates[2] = criteriaBuilder.like(criteriaBuilder.lower(queryRoot.get("phoneNumber")), '%' + searchValue + '%');
+            dataSearchPredicates[3] = criteriaBuilder.like(criteriaBuilder.lower(queryRoot.get("employeeId")), '%' + searchValue + '%');
+
+            // Construct search predicates for countPredicates
+            countSearchPredicates[0] = criteriaBuilder.like(criteriaBuilder.lower(countRoot.get("department")), '%' + searchValue + '%');
+            countSearchPredicates[1] = criteriaBuilder.like(criteriaBuilder.lower(countRoot.get("firstName")), '%' + searchValue + '%');
+            countSearchPredicates[2] = criteriaBuilder.like(criteriaBuilder.lower(countRoot.get("phoneNumber")), '%' + searchValue + '%');
+            countSearchPredicates[3] = criteriaBuilder.like(criteriaBuilder.lower(countRoot.get("employeeId")), '%' + searchValue + '%');
+
+            // Add search predicates to dataPredicates
+            dataPredicates.add(criteriaBuilder.or(dataSearchPredicates));
+
+            // Add search predicates to countPredicates
+            countPredicates.add(criteriaBuilder.or(countSearchPredicates));
         }
+
         criteriaQuery.select(criteriaBuilder.construct(EmployeeDTO.class,
                         queryRoot.get("employeeId").alias("employeeId"),
                         queryRoot.get("department").alias("department"),
@@ -119,7 +127,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                         queryRoot.get("phoneNumber").alias("phoneNumber"),
                         queryRoot.get("email").alias("email"),
                         queryRoot.get("address").alias("address"),
-                        queryRoot.get("position").alias("position"),
                         queryRoot.get("salary").alias("salary"),
                         queryRoot.get("modifiedAt").alias("modifiedAt")))
                 .where(dataPredicates.toArray(new Predicate[]{}))
@@ -141,33 +148,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public void deleteEmployee(String employeeId) {
         employeeRepository.deleteEmployee(employeeId);
-    }
-
-    @Override
-    public EmployeeDTO getEmployeeView(String employeeId) {
-        Optional<EmployeeEntity> employeeEntity = employeeRepository.findById(employeeId);
-        if (employeeEntity.isPresent()) {
-            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-            CriteriaQuery<EmployeeDTO> criteriaQuery = criteriaBuilder.createQuery(EmployeeDTO.class);
-            Root<EmployeeEntity> queryRoot = criteriaQuery.from(EmployeeEntity.class);
-            criteriaQuery.select(criteriaBuilder.construct(EmployeeDTO.class,
-                            queryRoot.get("employeeId").alias("employeeId"),
-                            queryRoot.get("department").alias("department"),
-                            queryRoot.get("firstName").alias("firstName"),
-                            queryRoot.get("dateOfBirth").alias("dateOfBirth"),
-                            queryRoot.get("gender").alias("gender"),
-                            queryRoot.get("lastName").alias("lastName"),
-                            queryRoot.get("phoneNumber").alias("phoneNumber"),
-                            queryRoot.get("email").alias("email"),
-                            queryRoot.get("address").alias("address"),
-                            queryRoot.get("position").alias("position"),
-                            queryRoot.get("salary").alias("salary"),
-                            queryRoot.get("modifiedAt").alias("modifiedAt")
-                    ))
-                    .where(criteriaBuilder.equal(queryRoot.get("employeeId"), employeeId));
-            return entityManager.createQuery(criteriaQuery).getSingleResult();
-        }
-        return null;
     }
 }
 
