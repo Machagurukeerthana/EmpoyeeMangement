@@ -21,9 +21,6 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmployeeEntity implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
     @Id
     @Column(name = "employeeid", nullable = false)
     private String employeeId;

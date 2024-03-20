@@ -17,6 +17,7 @@ import static com.example.Employee.management.CRUD.EndpointConstants.*;
 
 @RestController
 @Slf4j
+@CrossOrigin
 public class EmployeeController {
 
     private final EmployeeService employeeService;
